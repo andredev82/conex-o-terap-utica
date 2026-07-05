@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppPerfilRouteImport } from './routes/_authenticated/app.perfil'
 import { Route as AuthenticatedAppMensagensRouteImport } from './routes/_authenticated/app.mensagens'
 import { Route as AuthenticatedAppEmocoesRouteImport } from './routes/_authenticated/app.emocoes'
 import { Route as AuthenticatedAppDiarioRouteImport } from './routes/_authenticated/app.diario'
@@ -34,6 +35,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppPerfilRoute = AuthenticatedAppPerfilRouteImport.update({
+  id: '/app/perfil',
+  path: '/app/perfil',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAppMensagensRoute =
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/app/diario': typeof AuthenticatedAppDiarioRoute
   '/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/app/mensagens': typeof AuthenticatedAppMensagensRoute
+  '/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/app/diario': typeof AuthenticatedAppDiarioRoute
   '/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/app/mensagens': typeof AuthenticatedAppMensagensRoute
+  '/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/_authenticated/app/diario': typeof AuthenticatedAppDiarioRoute
   '/_authenticated/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/_authenticated/app/mensagens': typeof AuthenticatedAppMensagensRoute
+  '/_authenticated/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
@@ -87,9 +96,17 @@ export interface FileRouteTypes {
     | '/app/diario'
     | '/app/emocoes'
     | '/app/mensagens'
+    | '/app/perfil'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/app/diario' | '/app/emocoes' | '/app/mensagens' | '/app'
+  to:
+    | '/'
+    | '/auth'
+    | '/app/diario'
+    | '/app/emocoes'
+    | '/app/mensagens'
+    | '/app/perfil'
+    | '/app'
   id:
     | '__root__'
     | '/'
@@ -98,6 +115,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/diario'
     | '/_authenticated/app/emocoes'
     | '/_authenticated/app/mensagens'
+    | '/_authenticated/app/perfil'
     | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
@@ -137,6 +155,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app/perfil': {
+      id: '/_authenticated/app/perfil'
+      path: '/app/perfil'
+      fullPath: '/app/perfil'
+      preLoaderRoute: typeof AuthenticatedAppPerfilRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app/mensagens': {
       id: '/_authenticated/app/mensagens'
       path: '/app/mensagens'
@@ -165,6 +190,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppDiarioRoute: typeof AuthenticatedAppDiarioRoute
   AuthenticatedAppEmocoesRoute: typeof AuthenticatedAppEmocoesRoute
   AuthenticatedAppMensagensRoute: typeof AuthenticatedAppMensagensRoute
+  AuthenticatedAppPerfilRoute: typeof AuthenticatedAppPerfilRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
@@ -172,6 +198,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppDiarioRoute: AuthenticatedAppDiarioRoute,
   AuthenticatedAppEmocoesRoute: AuthenticatedAppEmocoesRoute,
   AuthenticatedAppMensagensRoute: AuthenticatedAppMensagensRoute,
+  AuthenticatedAppPerfilRoute: AuthenticatedAppPerfilRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
