@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppEmocoesRouteImport } from './routes/_authenticated/app.emocoes'
 import { Route as AuthenticatedAppDiarioRouteImport } from './routes/_authenticated/app.diario'
 
 const AuthRoute = AuthRouteImport.update({
@@ -34,6 +35,11 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   path: '/app/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppEmocoesRoute = AuthenticatedAppEmocoesRouteImport.update({
+  id: '/app/emocoes',
+  path: '/app/emocoes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppDiarioRoute = AuthenticatedAppDiarioRouteImport.update({
   id: '/app/diario',
   path: '/app/diario',
@@ -44,12 +50,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/diario': typeof AuthenticatedAppDiarioRoute
+  '/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/diario': typeof AuthenticatedAppDiarioRoute
+  '/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -58,19 +66,21 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/app/diario': typeof AuthenticatedAppDiarioRoute
+  '/_authenticated/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/app/diario' | '/app/'
+  fullPaths: '/' | '/auth' | '/app/diario' | '/app/emocoes' | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/app/diario' | '/app'
+  to: '/' | '/auth' | '/app/diario' | '/app/emocoes' | '/app'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/app/diario'
+    | '/_authenticated/app/emocoes'
     | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
@@ -110,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app/emocoes': {
+      id: '/_authenticated/app/emocoes'
+      path: '/app/emocoes'
+      fullPath: '/app/emocoes'
+      preLoaderRoute: typeof AuthenticatedAppEmocoesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app/diario': {
       id: '/_authenticated/app/diario'
       path: '/app/diario'
@@ -122,11 +139,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppDiarioRoute: typeof AuthenticatedAppDiarioRoute
+  AuthenticatedAppEmocoesRoute: typeof AuthenticatedAppEmocoesRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppDiarioRoute: AuthenticatedAppDiarioRoute,
+  AuthenticatedAppEmocoesRoute: AuthenticatedAppEmocoesRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
