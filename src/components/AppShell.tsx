@@ -1,12 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookHeart, HeartPulse, MessageCircle, LayoutDashboard, LogOut, User, Leaf } from "lucide-react";
+import { BookHeart, HeartPulse, MessageCircle, LayoutDashboard, LogOut, User, Leaf, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsTherapist } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-const nav = [
+const baseNav = [
   { to: "/app", label: "Início", icon: LayoutDashboard },
   { to: "/app/diario", label: "Diário", icon: BookHeart },
   { to: "/app/emocoes", label: "Emoções", icon: HeartPulse },
@@ -14,10 +15,16 @@ const nav = [
   { to: "/app/perfil", label: "Perfil", icon: User },
 ] as const;
 
+const therapistTab = { to: "/app/pacientes", label: "Pacientes", icon: Users } as const;
+
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { data: isTherapist } = useIsTherapist();
+  const nav = isTherapist
+    ? [...baseNav.slice(0, 4), therapistTab, baseNav[4]]
+    : baseNav;
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
