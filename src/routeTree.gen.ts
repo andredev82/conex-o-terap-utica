@@ -19,6 +19,7 @@ import { Route as AuthenticatedAppPacientesRouteImport } from './routes/_authent
 import { Route as AuthenticatedAppMensagensRouteImport } from './routes/_authenticated/app.mensagens'
 import { Route as AuthenticatedAppEmocoesRouteImport } from './routes/_authenticated/app.emocoes'
 import { Route as AuthenticatedAppDiarioRouteImport } from './routes/_authenticated/app.diario'
+import { Route as AuthenticatedAppPacientesIndexRouteImport } from './routes/_authenticated/app.pacientes.index'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -71,6 +72,12 @@ const AuthenticatedAppDiarioRoute = AuthenticatedAppDiarioRouteImport.update({
   path: '/app/diario',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAppPacientesIndexRoute =
+  AuthenticatedAppPacientesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppPacientesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -79,9 +86,10 @@ export interface FileRoutesByFullPath {
   '/app/diario': typeof AuthenticatedAppDiarioRoute
   '/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/app/mensagens': typeof AuthenticatedAppMensagensRoute
-  '/app/pacientes': typeof AuthenticatedAppPacientesRoute
+  '/app/pacientes': typeof AuthenticatedAppPacientesRouteWithChildren
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/pacientes/': typeof AuthenticatedAppPacientesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -90,9 +98,9 @@ export interface FileRoutesByTo {
   '/app/diario': typeof AuthenticatedAppDiarioRoute
   '/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/app/mensagens': typeof AuthenticatedAppMensagensRoute
-  '/app/pacientes': typeof AuthenticatedAppPacientesRoute
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/pacientes': typeof AuthenticatedAppPacientesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -103,9 +111,10 @@ export interface FileRoutesById {
   '/_authenticated/app/diario': typeof AuthenticatedAppDiarioRoute
   '/_authenticated/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/_authenticated/app/mensagens': typeof AuthenticatedAppMensagensRoute
-  '/_authenticated/app/pacientes': typeof AuthenticatedAppPacientesRoute
+  '/_authenticated/app/pacientes': typeof AuthenticatedAppPacientesRouteWithChildren
   '/_authenticated/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/pacientes/': typeof AuthenticatedAppPacientesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/app/pacientes'
     | '/app/perfil'
     | '/app/'
+    | '/app/pacientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -127,9 +137,9 @@ export interface FileRouteTypes {
     | '/app/diario'
     | '/app/emocoes'
     | '/app/mensagens'
-    | '/app/pacientes'
     | '/app/perfil'
     | '/app'
+    | '/app/pacientes'
   id:
     | '__root__'
     | '/'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/pacientes'
     | '/_authenticated/app/perfil'
     | '/_authenticated/app/'
+    | '/_authenticated/app/pacientes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -223,14 +234,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppDiarioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app/pacientes/': {
+      id: '/_authenticated/app/pacientes/'
+      path: '/'
+      fullPath: '/app/pacientes/'
+      preLoaderRoute: typeof AuthenticatedAppPacientesIndexRouteImport
+      parentRoute: typeof AuthenticatedAppPacientesRoute
+    }
   }
 }
+
+interface AuthenticatedAppPacientesRouteChildren {
+  AuthenticatedAppPacientesIndexRoute: typeof AuthenticatedAppPacientesIndexRoute
+}
+
+const AuthenticatedAppPacientesRouteChildren: AuthenticatedAppPacientesRouteChildren =
+  {
+    AuthenticatedAppPacientesIndexRoute: AuthenticatedAppPacientesIndexRoute,
+  }
+
+const AuthenticatedAppPacientesRouteWithChildren =
+  AuthenticatedAppPacientesRoute._addFileChildren(
+    AuthenticatedAppPacientesRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppDiarioRoute: typeof AuthenticatedAppDiarioRoute
   AuthenticatedAppEmocoesRoute: typeof AuthenticatedAppEmocoesRoute
   AuthenticatedAppMensagensRoute: typeof AuthenticatedAppMensagensRoute
-  AuthenticatedAppPacientesRoute: typeof AuthenticatedAppPacientesRoute
+  AuthenticatedAppPacientesRoute: typeof AuthenticatedAppPacientesRouteWithChildren
   AuthenticatedAppPerfilRoute: typeof AuthenticatedAppPerfilRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
@@ -239,7 +271,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppDiarioRoute: AuthenticatedAppDiarioRoute,
   AuthenticatedAppEmocoesRoute: AuthenticatedAppEmocoesRoute,
   AuthenticatedAppMensagensRoute: AuthenticatedAppMensagensRoute,
-  AuthenticatedAppPacientesRoute: AuthenticatedAppPacientesRoute,
+  AuthenticatedAppPacientesRoute: AuthenticatedAppPacientesRouteWithChildren,
   AuthenticatedAppPerfilRoute: AuthenticatedAppPerfilRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
