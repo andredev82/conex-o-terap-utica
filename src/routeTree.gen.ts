@@ -20,6 +20,7 @@ import { Route as AuthenticatedAppMensagensRouteImport } from './routes/_authent
 import { Route as AuthenticatedAppEmocoesRouteImport } from './routes/_authenticated/app.emocoes'
 import { Route as AuthenticatedAppDiarioRouteImport } from './routes/_authenticated/app.diario'
 import { Route as AuthenticatedAppPacientesIndexRouteImport } from './routes/_authenticated/app.pacientes.index'
+import { Route as AuthenticatedAppPacientesPatientIdRouteImport } from './routes/_authenticated/app.pacientes.$patientId'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -78,6 +79,12 @@ const AuthenticatedAppPacientesIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAppPacientesRoute,
   } as any)
+const AuthenticatedAppPacientesPatientIdRoute =
+  AuthenticatedAppPacientesPatientIdRouteImport.update({
+    id: '/$patientId',
+    path: '/$patientId',
+    getParentRoute: () => AuthenticatedAppPacientesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/app/pacientes': typeof AuthenticatedAppPacientesRouteWithChildren
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/pacientes/$patientId': typeof AuthenticatedAppPacientesPatientIdRoute
   '/app/pacientes/': typeof AuthenticatedAppPacientesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -100,6 +108,7 @@ export interface FileRoutesByTo {
   '/app/mensagens': typeof AuthenticatedAppMensagensRoute
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/pacientes/$patientId': typeof AuthenticatedAppPacientesPatientIdRoute
   '/app/pacientes': typeof AuthenticatedAppPacientesIndexRoute
 }
 export interface FileRoutesById {
@@ -114,6 +123,7 @@ export interface FileRoutesById {
   '/_authenticated/app/pacientes': typeof AuthenticatedAppPacientesRouteWithChildren
   '/_authenticated/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/pacientes/$patientId': typeof AuthenticatedAppPacientesPatientIdRoute
   '/_authenticated/app/pacientes/': typeof AuthenticatedAppPacientesIndexRoute
 }
 export interface FileRouteTypes {
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/app/pacientes'
     | '/app/perfil'
     | '/app/'
+    | '/app/pacientes/$patientId'
     | '/app/pacientes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/app/mensagens'
     | '/app/perfil'
     | '/app'
+    | '/app/pacientes/$patientId'
     | '/app/pacientes'
   id:
     | '__root__'
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/pacientes'
     | '/_authenticated/app/perfil'
     | '/_authenticated/app/'
+    | '/_authenticated/app/pacientes/$patientId'
     | '/_authenticated/app/pacientes/'
   fileRoutesById: FileRoutesById
 }
@@ -241,15 +254,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppPacientesIndexRouteImport
       parentRoute: typeof AuthenticatedAppPacientesRoute
     }
+    '/_authenticated/app/pacientes/$patientId': {
+      id: '/_authenticated/app/pacientes/$patientId'
+      path: '/$patientId'
+      fullPath: '/app/pacientes/$patientId'
+      preLoaderRoute: typeof AuthenticatedAppPacientesPatientIdRouteImport
+      parentRoute: typeof AuthenticatedAppPacientesRoute
+    }
   }
 }
 
 interface AuthenticatedAppPacientesRouteChildren {
+  AuthenticatedAppPacientesPatientIdRoute: typeof AuthenticatedAppPacientesPatientIdRoute
   AuthenticatedAppPacientesIndexRoute: typeof AuthenticatedAppPacientesIndexRoute
 }
 
 const AuthenticatedAppPacientesRouteChildren: AuthenticatedAppPacientesRouteChildren =
   {
+    AuthenticatedAppPacientesPatientIdRoute:
+      AuthenticatedAppPacientesPatientIdRoute,
     AuthenticatedAppPacientesIndexRoute: AuthenticatedAppPacientesIndexRoute,
   }
 
