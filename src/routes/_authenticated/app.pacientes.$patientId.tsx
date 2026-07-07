@@ -291,11 +291,20 @@ function PatientDetailPage() {
                     connectNulls
                     dot={{ r: 3 }}
                   />
+                  <Line
+                    type="monotone"
+                    dataKey="dass21"
+                    name="DASS-21"
+                    stroke="var(--chart-2)"
+                    strokeWidth={2}
+                    connectNulls
+                    dot={{ r: 3 }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground">
-              GAD-7 (ansiedade, 0–21) · PHQ-9 (depressão, 0–27). Quanto menor, melhor.
+              GAD-7 (ansiedade, 0–21) · PHQ-9 (depressão, 0–27) · DASS-21 (total, 0–63). Quanto menor, melhor.
             </p>
           </>
         ) : (
