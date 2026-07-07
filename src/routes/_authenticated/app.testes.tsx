@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import {
   ASSESSMENTS,
   RESPONSE_OPTIONS,
+  computeResult,
   severityToneClass,
   type AssessmentType,
 } from "@/lib/assessments";
