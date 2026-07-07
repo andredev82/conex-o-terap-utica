@@ -232,7 +232,78 @@ function PatientDetailPage() {
         </div>
       </div>
 
+      <div className="mb-5 rounded-2xl border border-border bg-card p-4">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <ClipboardList className="size-4 text-primary" /> Evolução dos testes
+        </h2>
+        {chartData.length > 0 ? (
+          <>
+            <div className="mb-3 flex flex-wrap gap-2">
+              {(Object.keys(ASSESSMENTS) as AssessmentType[]).map((t) => {
+                const l = latest[t];
+                if (!l) return null;
+                const tone = ASSESSMENTS[t].severity(l.score).tone;
+                return (
+                  <span
+                    key={t}
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-medium",
+                      severityToneClass[tone],
+                    )}
+                  >
+                    {ASSESSMENTS[t].short}: {l.score} · {l.severity}
+                  </span>
+                );
+              })}
+            </div>
+            <div className="h-56 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" domain={[0, 27]} />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid hsl(var(--border))",
+                      background: "hsl(var(--card))",
+                      fontSize: 12,
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="gad7"
+                    name="GAD-7"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    connectNulls
+                    dot={{ r: 3 }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="phq9"
+                    name="PHQ-9"
+                    stroke="hsl(var(--accent-foreground))"
+                    strokeWidth={2}
+                    connectNulls
+                    dot={{ r: 3 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              GAD-7 (ansiedade, 0–21) · PHQ-9 (depressão, 0–27). Quanto menor, melhor.
+            </p>
+          </>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            {name.split(" ")[0]} ainda não respondeu nenhum teste.
+          </p>
+        )}
+      </div>
+
       <div className="flex h-[60vh] flex-col rounded-2xl border border-border bg-card">
+
         <div className="flex-1 space-y-3 overflow-y-auto p-4">
           {messages?.length === 0 && (
             <p className="mt-10 text-center text-sm text-muted-foreground">
