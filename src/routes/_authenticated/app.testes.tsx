@@ -192,8 +192,13 @@ function TakeTest({ type, onDone }: { type: AssessmentType; onDone: () => void }
             <p className="mb-3 text-sm font-medium">
               {i + 1}. {q}
             </p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {RESPONSE_OPTIONS.map((opt) => {
+            <div
+              className={cn(
+                "grid gap-2",
+                def.responseOptions ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-4",
+              )}
+            >
+              {options.map((opt) => {
                 const selected = answers[i] === opt.value;
                 return (
                   <button
