@@ -156,7 +156,10 @@ function PatientDetailPage() {
   const name = patient?.full_name?.trim() || "Paciente";
 
   const chartData = useMemo(() => {
-    const byDate = new Map<string, { date: string; gad7?: number; phq9?: number }>();
+    const byDate = new Map<
+      string,
+      { date: string } & Partial<Record<AssessmentType, number>>
+    >();
     for (const a of assessments ?? []) {
       const key = format(new Date(a.created_at), "d MMM", { locale: ptBR });
       const row = byDate.get(key) ?? { date: key };
