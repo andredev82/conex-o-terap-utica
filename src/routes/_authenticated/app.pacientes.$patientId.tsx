@@ -88,6 +88,24 @@ function PatientDetailPage() {
     },
   });
 
+  const { data: assessments } = useQuery({
+    queryKey: ["patient-assessments", patientId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("assessments")
+        .select("id, type, score, severity, created_at")
+        .eq("user_id", patientId)
+        .order("created_at", { ascending: true });
+      return (data ?? []) as {
+        id: string;
+        type: AssessmentType;
+        score: number;
+        severity: string;
+        created_at: string;
+      }[];
+    },
+  });
+
   const { data: messages } = useQuery({
     queryKey: ["thread", patientId],
     queryFn: async () => {
