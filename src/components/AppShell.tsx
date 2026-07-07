@@ -24,7 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { data: isTherapist } = useIsTherapist();
   const nav = isTherapist
-    ? [...baseNav.slice(0, 4), therapistTab, baseNav[4]]
+    ? [...baseNav.slice(0, 5), therapistTab, baseNav[5]]
     : baseNav;
 
   async function handleSignOut() {
