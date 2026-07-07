@@ -259,14 +259,14 @@ function PatientDetailPage() {
             <div className="h-56 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" domain={[0, 27]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
+                  <YAxis tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" domain={[0, 27]} />
                   <Tooltip
                     contentStyle={{
                       borderRadius: 12,
-                      border: "1px solid hsl(var(--border))",
-                      background: "hsl(var(--card))",
+                      border: "1px solid var(--border)",
+                      background: "var(--card)",
                       fontSize: 12,
                     }}
                   />
@@ -274,7 +274,7 @@ function PatientDetailPage() {
                     type="monotone"
                     dataKey="gad7"
                     name="GAD-7"
-                    stroke="hsl(var(--primary))"
+                    stroke="var(--chart-1)"
                     strokeWidth={2}
                     connectNulls
                     dot={{ r: 3 }}
@@ -283,7 +283,7 @@ function PatientDetailPage() {
                     type="monotone"
                     dataKey="phq9"
                     name="PHQ-9"
-                    stroke="hsl(var(--accent-foreground))"
+                    stroke="var(--chart-4)"
                     strokeWidth={2}
                     connectNulls
                     dot={{ r: 3 }}
