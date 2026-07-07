@@ -1,13 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ArrowLeft, Send, BookHeart, HeartPulse } from "lucide-react";
+import { ArrowLeft, Send, BookHeart, HeartPulse, ClipboardList } from "lucide-react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { ASSESSMENTS, severityToneClass, type AssessmentType } from "@/lib/assessments";
 
 export const Route = createFileRoute("/_authenticated/app/pacientes/$patientId")({
   component: PatientDetailPage,
