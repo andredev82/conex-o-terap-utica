@@ -155,6 +155,23 @@ function PatientDetailPage() {
 
   const name = patient?.full_name?.trim() || "Paciente";
 
+  const chartData = useMemo(() => {
+    const byDate = new Map<string, { date: string; gad7?: number; phq9?: number }>();
+    for (const a of assessments ?? []) {
+      const key = format(new Date(a.created_at), "d MMM", { locale: ptBR });
+      const row = byDate.get(key) ?? { date: key };
+      row[a.type] = a.score;
+      byDate.set(key, row);
+    }
+    return Array.from(byDate.values());
+  }, [assessments]);
+
+  const latest = useMemo(() => {
+    const out: Partial<Record<AssessmentType, { score: number; severity: string }>> = {};
+    for (const a of assessments ?? []) out[a.type] = { score: a.score, severity: a.severity };
+    return out;
+  }, [assessments]);
+
   return (
     <AppShell>
       <div className="mb-4 flex items-center gap-3">
