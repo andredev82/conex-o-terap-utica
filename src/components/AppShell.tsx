@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookHeart, HeartPulse, MessageCircle, LayoutDashboard, LogOut, User, Leaf, Users } from "lucide-react";
+import { BookHeart, HeartPulse, MessageCircle, LayoutDashboard, LogOut, User, Leaf, Users, ClipboardList } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsTherapist } from "@/hooks/use-role";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,7 @@ const baseNav = [
   { to: "/app", label: "Início", icon: LayoutDashboard },
   { to: "/app/diario", label: "Diário", icon: BookHeart },
   { to: "/app/emocoes", label: "Emoções", icon: HeartPulse },
+  { to: "/app/testes", label: "Testes", icon: ClipboardList },
   { to: "/app/mensagens", label: "Mensagens", icon: MessageCircle },
   { to: "/app/perfil", label: "Perfil", icon: User },
 ] as const;
@@ -23,7 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { data: isTherapist } = useIsTherapist();
   const nav = isTherapist
-    ? [...baseNav.slice(0, 4), therapistTab, baseNav[4]]
+    ? [...baseNav.slice(0, 5), therapistTab, baseNav[5]]
     : baseNav;
 
   async function handleSignOut() {
