@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      assessments: {
+        Row: {
+          answers: number[]
+          created_at: string
+          id: string
+          score: number
+          severity: string
+          type: Database["public"]["Enums"]["assessment_type"]
+          user_id: string
+        }
+        Insert: {
+          answers: number[]
+          created_at?: string
+          id?: string
+          score: number
+          severity: string
+          type: Database["public"]["Enums"]["assessment_type"]
+          user_id: string
+        }
+        Update: {
+          answers?: number[]
+          created_at?: string
+          id?: string
+          score?: number
+          severity?: string
+          type?: Database["public"]["Enums"]["assessment_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       diary_entries: {
         Row: {
           alternative_thought: string | null
@@ -183,6 +213,7 @@ export type Database = {
     }
     Enums: {
       app_role: "patient" | "therapist" | "admin"
+      assessment_type: "gad7" | "phq9"
       specialty:
         | "psychology"
         | "occupational_therapy"
@@ -318,6 +349,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["patient", "therapist", "admin"],
+      assessment_type: ["gad7", "phq9"],
       specialty: [
         "psychology",
         "occupational_therapy",
