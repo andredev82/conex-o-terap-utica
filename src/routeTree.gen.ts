@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppTestesRouteImport } from './routes/_authenticated/app.testes'
 import { Route as AuthenticatedAppPerfilRouteImport } from './routes/_authenticated/app.perfil'
 import { Route as AuthenticatedAppPacientesRouteImport } from './routes/_authenticated/app.pacientes'
 import { Route as AuthenticatedAppMensagensRouteImport } from './routes/_authenticated/app.mensagens'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppTestesRoute = AuthenticatedAppTestesRouteImport.update({
+  id: '/app/testes',
+  path: '/app/testes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAppPerfilRoute = AuthenticatedAppPerfilRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/app/mensagens': typeof AuthenticatedAppMensagensRoute
   '/app/pacientes': typeof AuthenticatedAppPacientesRouteWithChildren
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
+  '/app/testes': typeof AuthenticatedAppTestesRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/pacientes/$patientId': typeof AuthenticatedAppPacientesPatientIdRoute
   '/app/pacientes/': typeof AuthenticatedAppPacientesIndexRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/app/emocoes': typeof AuthenticatedAppEmocoesRoute
   '/app/mensagens': typeof AuthenticatedAppMensagensRoute
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
+  '/app/testes': typeof AuthenticatedAppTestesRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/pacientes/$patientId': typeof AuthenticatedAppPacientesPatientIdRoute
   '/app/pacientes': typeof AuthenticatedAppPacientesIndexRoute
@@ -122,6 +130,7 @@ export interface FileRoutesById {
   '/_authenticated/app/mensagens': typeof AuthenticatedAppMensagensRoute
   '/_authenticated/app/pacientes': typeof AuthenticatedAppPacientesRouteWithChildren
   '/_authenticated/app/perfil': typeof AuthenticatedAppPerfilRoute
+  '/_authenticated/app/testes': typeof AuthenticatedAppTestesRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/pacientes/$patientId': typeof AuthenticatedAppPacientesPatientIdRoute
   '/_authenticated/app/pacientes/': typeof AuthenticatedAppPacientesIndexRoute
@@ -137,6 +146,7 @@ export interface FileRouteTypes {
     | '/app/mensagens'
     | '/app/pacientes'
     | '/app/perfil'
+    | '/app/testes'
     | '/app/'
     | '/app/pacientes/$patientId'
     | '/app/pacientes/'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/app/emocoes'
     | '/app/mensagens'
     | '/app/perfil'
+    | '/app/testes'
     | '/app'
     | '/app/pacientes/$patientId'
     | '/app/pacientes'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/mensagens'
     | '/_authenticated/app/pacientes'
     | '/_authenticated/app/perfil'
+    | '/_authenticated/app/testes'
     | '/_authenticated/app/'
     | '/_authenticated/app/pacientes/$patientId'
     | '/_authenticated/app/pacientes/'
@@ -210,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app/'
       preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/app/testes': {
+      id: '/_authenticated/app/testes'
+      path: '/app/testes'
+      fullPath: '/app/testes'
+      preLoaderRoute: typeof AuthenticatedAppTestesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/app/perfil': {
@@ -287,6 +306,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppMensagensRoute: typeof AuthenticatedAppMensagensRoute
   AuthenticatedAppPacientesRoute: typeof AuthenticatedAppPacientesRouteWithChildren
   AuthenticatedAppPerfilRoute: typeof AuthenticatedAppPerfilRoute
+  AuthenticatedAppTestesRoute: typeof AuthenticatedAppTestesRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
@@ -296,6 +316,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppMensagensRoute: AuthenticatedAppMensagensRoute,
   AuthenticatedAppPacientesRoute: AuthenticatedAppPacientesRouteWithChildren,
   AuthenticatedAppPerfilRoute: AuthenticatedAppPerfilRoute,
+  AuthenticatedAppTestesRoute: AuthenticatedAppTestesRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
