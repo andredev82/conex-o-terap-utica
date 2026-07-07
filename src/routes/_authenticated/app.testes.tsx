@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import {
   ASSESSMENTS,
   RESPONSE_OPTIONS,
+  computeResult,
   severityToneClass,
   type AssessmentType,
 } from "@/lib/assessments";
@@ -127,33 +128,38 @@ function TestsPage() {
 
 function TakeTest({ type, onDone }: { type: AssessmentType; onDone: () => void }) {
   const def = ASSESSMENTS[type];
+  const options = def.responseOptions ?? RESPONSE_OPTIONS;
   const qc = useQueryClient();
   const [answers, setAnswers] = useState<(number | null)[]>(
     () => Array(def.questions.length).fill(null),
   );
 
-  const score = useMemo(
-    () => answers.reduce<number>((sum, a) => sum + (a ?? 0), 0),
-    [answers],
-  );
+  const result = useMemo(() => computeResult(def, answers), [def, answers]);
+  const score = result.score;
   const complete = answers.every((a) => a !== null);
 
   const save = useMutation({
     mutationFn: async () => {
       if (!complete) throw new Error("incomplete");
       const { data: u } = await supabase.auth.getUser();
-      const severity = def.severity(score).label;
       const { error } = await supabase.from("assessments").insert({
         user_id: u.user!.id,
         type,
         score,
-        severity,
+        severity: result.label,
         answers: answers as number[],
       });
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Teste registrado.");
+      toast.success("Teste registrado.", {
+        description:
+          result.subscales.length > 0
+            ? result.subscales
+                .map((s) => `${s.name}: ${s.score} (${s.severity.label})`)
+                .join(" · ")
+            : result.label,
+      });
       qc.invalidateQueries({ queryKey: ["assessments"] });
       onDone();
     },
@@ -186,8 +192,13 @@ function TakeTest({ type, onDone }: { type: AssessmentType; onDone: () => void }
             <p className="mb-3 text-sm font-medium">
               {i + 1}. {q}
             </p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {RESPONSE_OPTIONS.map((opt) => {
+            <div
+              className={cn(
+                "grid gap-2",
+                def.responseOptions ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-4",
+              )}
+            >
+              {options.map((opt) => {
                 const selected = answers[i] === opt.value;
                 return (
                   <button

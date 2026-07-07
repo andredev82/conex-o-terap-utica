@@ -213,7 +213,7 @@ export type Database = {
     }
     Enums: {
       app_role: "patient" | "therapist" | "admin"
-      assessment_type: "gad7" | "phq9"
+      assessment_type: "gad7" | "phq9" | "dass21"
       specialty:
         | "psychology"
         | "occupational_therapy"
@@ -349,7 +349,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["patient", "therapist", "admin"],
-      assessment_type: ["gad7", "phq9"],
+      assessment_type: ["gad7", "phq9", "dass21"],
       specialty: [
         "psychology",
         "occupational_therapy",

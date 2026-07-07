@@ -156,7 +156,10 @@ function PatientDetailPage() {
   const name = patient?.full_name?.trim() || "Paciente";
 
   const chartData = useMemo(() => {
-    const byDate = new Map<string, { date: string; gad7?: number; phq9?: number }>();
+    const byDate = new Map<
+      string,
+      { date: string } & Partial<Record<AssessmentType, number>>
+    >();
     for (const a of assessments ?? []) {
       const key = format(new Date(a.created_at), "d MMM", { locale: ptBR });
       const row = byDate.get(key) ?? { date: key };
@@ -261,7 +264,7 @@ function PatientDetailPage() {
                 <LineChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" domain={[0, 27]} />
+                  <YAxis tick={{ fontSize: 11 }} stroke="var(--muted-foreground)" domain={[0, "auto"]} />
                   <Tooltip
                     contentStyle={{
                       borderRadius: 12,
@@ -288,11 +291,20 @@ function PatientDetailPage() {
                     connectNulls
                     dot={{ r: 3 }}
                   />
+                  <Line
+                    type="monotone"
+                    dataKey="dass21"
+                    name="DASS-21"
+                    stroke="var(--chart-2)"
+                    strokeWidth={2}
+                    connectNulls
+                    dot={{ r: 3 }}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </div>
             <p className="mt-2 text-[11px] text-muted-foreground">
-              GAD-7 (ansiedade, 0–21) · PHQ-9 (depressão, 0–27). Quanto menor, melhor.
+              GAD-7 (ansiedade, 0–21) · PHQ-9 (depressão, 0–27) · DASS-21 (total, 0–63). Quanto menor, melhor.
             </p>
           </>
         ) : (
