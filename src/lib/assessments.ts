@@ -1,4 +1,10 @@
-export type AssessmentType = "gad7" | "phq9" | "dass21";
+export type AssessmentType =
+  | "gad7"
+  | "phq9"
+  | "dass21"
+  | "who5"
+  | "pss10"
+  | "auditc";
 
 export type ResponseOption = { value: number; label: string };
 
