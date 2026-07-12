@@ -106,7 +106,10 @@ function TestsPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-serif text-lg font-semibold">{h.score}</span>
+                    <span className="font-serif text-lg font-semibold">
+                      {def.displayScore ? def.displayScore(h.score) : h.score}
+                    </span>
+
                     <span
                       className={cn(
                         "rounded-full px-2.5 py-0.5 text-xs font-medium",
