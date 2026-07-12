@@ -44,6 +44,14 @@ export type AssessmentDef = {
   questions: string[];
   maxScore: number;
   responseOptions?: readonly ResponseOption[];
+  // Opções distintas por pergunta (ex.: AUDIT-C). Tem prioridade sobre responseOptions.
+  optionsPerQuestion?: readonly (readonly ResponseOption[])[];
+  // Índices (0-based) de itens com pontuação invertida (ex.: PSS-10).
+  reverseIndices?: number[];
+  // Maior pontuação = melhor (ex.: WHO-5) — inverte o tom das cores.
+  higherIsBetter?: boolean;
+  // Formata a pontuação para exibição (ex.: WHO-5 em %).
+  displayScore?: (score: number) => string;
   subscales?: SubscaleDef[];
   severity: (score: number) => Severity;
 };
