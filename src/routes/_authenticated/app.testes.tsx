@@ -233,12 +233,17 @@ function TakeTest({ type, onDone }: { type: AssessmentType; onDone: () => void }
 
       <div className="sticky bottom-20 mt-6 flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm md:bottom-4">
         <div>
-          <p className="text-xs text-muted-foreground">Pontuação parcial</p>
+          <p className="text-xs text-muted-foreground">
+            {def.higherIsBetter ? "Bem-estar parcial" : "Pontuação parcial"}
+          </p>
           <p className="font-serif text-2xl font-semibold text-primary">
-            {score}
-            <span className="text-sm text-muted-foreground"> / {def.maxScore}</span>
+            {def.displayScore ? def.displayScore(score) : score}
+            {!def.displayScore && (
+              <span className="text-sm text-muted-foreground"> / {def.maxScore}</span>
+            )}
           </p>
         </div>
+
         <button
           onClick={() => save.mutate()}
           disabled={!complete || save.isPending}
