@@ -173,6 +173,33 @@ export type Database = {
         }
         Relationships: []
       }
+      tool_entries: {
+        Row: {
+          created_at: string
+          data: Json
+          id: string
+          tool_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json
+          id?: string
+          tool_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          id?: string
+          tool_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -213,7 +240,7 @@ export type Database = {
     }
     Enums: {
       app_role: "patient" | "therapist" | "admin"
-      assessment_type: "gad7" | "phq9" | "dass21"
+      assessment_type: "gad7" | "phq9" | "dass21" | "who5" | "pss10" | "auditc"
       specialty:
         | "psychology"
         | "occupational_therapy"
@@ -349,7 +376,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["patient", "therapist", "admin"],
-      assessment_type: ["gad7", "phq9", "dass21"],
+      assessment_type: ["gad7", "phq9", "dass21", "who5", "pss10", "auditc"],
       specialty: [
         "psychology",
         "occupational_therapy",

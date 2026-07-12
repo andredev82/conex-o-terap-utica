@@ -18,6 +18,7 @@ import { Route as AuthenticatedAppTestesRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAppPerfilRouteImport } from './routes/_authenticated/app.perfil'
 import { Route as AuthenticatedAppPacientesRouteImport } from './routes/_authenticated/app.pacientes'
 import { Route as AuthenticatedAppMensagensRouteImport } from './routes/_authenticated/app.mensagens'
+import { Route as AuthenticatedAppFerramentasRouteImport } from './routes/_authenticated/app.ferramentas'
 import { Route as AuthenticatedAppEmocoesRouteImport } from './routes/_authenticated/app.emocoes'
 import { Route as AuthenticatedAppDiarioRouteImport } from './routes/_authenticated/app.diario'
 import { Route as AuthenticatedAppPacientesIndexRouteImport } from './routes/_authenticated/app.pacientes.index'
@@ -69,6 +70,12 @@ const AuthenticatedAppMensagensRoute =
     path: '/app/mensagens',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAppFerramentasRoute =
+  AuthenticatedAppFerramentasRouteImport.update({
+    id: '/app/ferramentas',
+    path: '/app/ferramentas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAppEmocoesRoute = AuthenticatedAppEmocoesRouteImport.update({
   id: '/app/emocoes',
   path: '/app/emocoes',
@@ -98,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/diario': typeof AuthenticatedAppDiarioRoute
   '/app/emocoes': typeof AuthenticatedAppEmocoesRoute
+  '/app/ferramentas': typeof AuthenticatedAppFerramentasRoute
   '/app/mensagens': typeof AuthenticatedAppMensagensRoute
   '/app/pacientes': typeof AuthenticatedAppPacientesRouteWithChildren
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
@@ -112,6 +120,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app/diario': typeof AuthenticatedAppDiarioRoute
   '/app/emocoes': typeof AuthenticatedAppEmocoesRoute
+  '/app/ferramentas': typeof AuthenticatedAppFerramentasRoute
   '/app/mensagens': typeof AuthenticatedAppMensagensRoute
   '/app/perfil': typeof AuthenticatedAppPerfilRoute
   '/app/testes': typeof AuthenticatedAppTestesRoute
@@ -127,6 +136,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/app/diario': typeof AuthenticatedAppDiarioRoute
   '/_authenticated/app/emocoes': typeof AuthenticatedAppEmocoesRoute
+  '/_authenticated/app/ferramentas': typeof AuthenticatedAppFerramentasRoute
   '/_authenticated/app/mensagens': typeof AuthenticatedAppMensagensRoute
   '/_authenticated/app/pacientes': typeof AuthenticatedAppPacientesRouteWithChildren
   '/_authenticated/app/perfil': typeof AuthenticatedAppPerfilRoute
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/app/diario'
     | '/app/emocoes'
+    | '/app/ferramentas'
     | '/app/mensagens'
     | '/app/pacientes'
     | '/app/perfil'
@@ -157,6 +168,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/app/diario'
     | '/app/emocoes'
+    | '/app/ferramentas'
     | '/app/mensagens'
     | '/app/perfil'
     | '/app/testes'
@@ -171,6 +183,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/_authenticated/app/diario'
     | '/_authenticated/app/emocoes'
+    | '/_authenticated/app/ferramentas'
     | '/_authenticated/app/mensagens'
     | '/_authenticated/app/pacientes'
     | '/_authenticated/app/perfil'
@@ -252,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppMensagensRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/app/ferramentas': {
+      id: '/_authenticated/app/ferramentas'
+      path: '/app/ferramentas'
+      fullPath: '/app/ferramentas'
+      preLoaderRoute: typeof AuthenticatedAppFerramentasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/app/emocoes': {
       id: '/_authenticated/app/emocoes'
       path: '/app/emocoes'
@@ -303,6 +323,7 @@ const AuthenticatedAppPacientesRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAppDiarioRoute: typeof AuthenticatedAppDiarioRoute
   AuthenticatedAppEmocoesRoute: typeof AuthenticatedAppEmocoesRoute
+  AuthenticatedAppFerramentasRoute: typeof AuthenticatedAppFerramentasRoute
   AuthenticatedAppMensagensRoute: typeof AuthenticatedAppMensagensRoute
   AuthenticatedAppPacientesRoute: typeof AuthenticatedAppPacientesRouteWithChildren
   AuthenticatedAppPerfilRoute: typeof AuthenticatedAppPerfilRoute
@@ -313,6 +334,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAppDiarioRoute: AuthenticatedAppDiarioRoute,
   AuthenticatedAppEmocoesRoute: AuthenticatedAppEmocoesRoute,
+  AuthenticatedAppFerramentasRoute: AuthenticatedAppFerramentasRoute,
   AuthenticatedAppMensagensRoute: AuthenticatedAppMensagensRoute,
   AuthenticatedAppPacientesRoute: AuthenticatedAppPacientesRouteWithChildren,
   AuthenticatedAppPerfilRoute: AuthenticatedAppPerfilRoute,
@@ -332,13 +354,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

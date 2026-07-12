@@ -1,4 +1,10 @@
-export type AssessmentType = "gad7" | "phq9" | "dass21";
+export type AssessmentType =
+  | "gad7"
+  | "phq9"
+  | "dass21"
+  | "who5"
+  | "pss10"
+  | "auditc";
 
 export type ResponseOption = { value: number; label: string };
 
@@ -38,6 +44,14 @@ export type AssessmentDef = {
   questions: string[];
   maxScore: number;
   responseOptions?: readonly ResponseOption[];
+  // Opções distintas por pergunta (ex.: AUDIT-C). Tem prioridade sobre responseOptions.
+  optionsPerQuestion?: readonly (readonly ResponseOption[])[];
+  // Índices (0-based) de itens com pontuação invertida (ex.: PSS-10).
+  reverseIndices?: number[];
+  // Maior pontuação = melhor (ex.: WHO-5) — inverte o tom das cores.
+  higherIsBetter?: boolean;
+  // Formata a pontuação para exibição (ex.: WHO-5 em %).
+  displayScore?: (score: number) => string;
   subscales?: SubscaleDef[];
   severity: (score: number) => Severity;
 };
@@ -192,10 +206,132 @@ export const DASS21: AssessmentDef = {
   },
 };
 
+// WHO-5 (Índice de Bem-Estar da OMS) — uso livre, maior pontuação = melhor.
+export const WHO5_OPTIONS: readonly ResponseOption[] = [
+  { value: 0, label: "Em nenhum momento" },
+  { value: 1, label: "Alguns momentos" },
+  { value: 2, label: "Menos da metade do tempo" },
+  { value: 3, label: "Mais da metade do tempo" },
+  { value: 4, label: "A maior parte do tempo" },
+  { value: 5, label: "O tempo todo" },
+] as const;
+
+export const WHO5: AssessmentDef = {
+  type: "who5",
+  name: "WHO-5 · Bem-estar",
+  short: "WHO-5",
+  description: "Índice de bem-estar da OMS (uso livre). Maior pontuação = melhor.",
+  intro:
+    "Nas últimas 2 semanas, indique como você tem se sentido. Não há respostas certas ou erradas.",
+  maxScore: 25,
+  responseOptions: WHO5_OPTIONS,
+  higherIsBetter: true,
+  displayScore: (s) => `${s * 4}%`,
+  questions: [
+    "Senti-me alegre e de bom humor",
+    "Senti-me calmo(a) e relaxado(a)",
+    "Senti-me ativo(a) e cheio(a) de energia",
+    "Acordei sentindo-me revigorado(a) e descansado(a)",
+    "Meu dia a dia esteve cheio de coisas que me interessam",
+  ],
+  severity: (s) => {
+    // Pontuação bruta 0–25 (bem-estar = raw×4 em %).
+    if (s <= 6) return { label: "Muito baixo", tone: "severe" };
+    if (s <= 12) return { label: "Baixo", tone: "high" };
+    if (s <= 17) return { label: "Moderado", tone: "moderate" };
+    if (s <= 21) return { label: "Bom", tone: "mild" };
+    return { label: "Ótimo", tone: "calm" };
+  },
+};
+
+// PSS-10 (Escala de Estresse Percebido, Cohen) — uso livre. Itens 4,5,7,8 invertidos.
+export const PSS_OPTIONS: readonly ResponseOption[] = [
+  { value: 0, label: "Nunca" },
+  { value: 1, label: "Quase nunca" },
+  { value: 2, label: "Às vezes" },
+  { value: 3, label: "Com frequência" },
+  { value: 4, label: "Muito frequentemente" },
+] as const;
+
+export const PSS10: AssessmentDef = {
+  type: "pss10",
+  name: "PSS-10 · Estresse percebido",
+  short: "PSS-10",
+  description: "Escala de estresse percebido no último mês (uso livre).",
+  intro:
+    "No último mês, com que frequência você se sentiu ou pensou de determinada maneira?",
+  maxScore: 40,
+  responseOptions: PSS_OPTIONS,
+  reverseIndices: [3, 4, 6, 7], // itens 4,5,7,8 (1-based)
+  questions: [
+    "Ficou aborrecido(a) por causa de algo que aconteceu inesperadamente",
+    "Sentiu que não conseguia controlar as coisas importantes da sua vida",
+    "Sentiu-se nervoso(a) e estressado(a)",
+    "Sentiu confiança na sua capacidade de lidar com seus problemas pessoais",
+    "Sentiu que as coisas estavam acontecendo conforme o esperado",
+    "Percebeu que não conseguia lidar com todas as coisas que tinha para fazer",
+    "Conseguiu controlar as irritações na sua vida",
+    "Sentiu que estava no controle das coisas",
+    "Ficou irritado(a) por coisas que estavam fora do seu controle",
+    "Sentiu que as dificuldades se acumulavam a ponto de não conseguir superá-las",
+  ],
+  severity: (s) => {
+    if (s <= 13) return { label: "Baixo", tone: "calm" };
+    if (s <= 26) return { label: "Moderado", tone: "moderate" };
+    return { label: "Alto", tone: "severe" };
+  },
+};
+
+// AUDIT-C (rastreio de uso de álcool, OMS) — uso livre. Opções distintas por item.
+export const AUDITC: AssessmentDef = {
+  type: "auditc",
+  name: "AUDIT-C · Uso de álcool",
+  short: "AUDIT-C",
+  description: "Rastreio breve de padrão de consumo de álcool (uso livre).",
+  intro: "Responda pensando no seu consumo de bebidas alcoólicas.",
+  maxScore: 12,
+  optionsPerQuestion: [
+    [
+      { value: 0, label: "Nunca" },
+      { value: 1, label: "1x/mês ou menos" },
+      { value: 2, label: "2 a 4x/mês" },
+      { value: 3, label: "2 a 3x/semana" },
+      { value: 4, label: "4x ou mais/semana" },
+    ],
+    [
+      { value: 0, label: "1 ou 2" },
+      { value: 1, label: "3 ou 4" },
+      { value: 2, label: "5 ou 6" },
+      { value: 3, label: "7 a 9" },
+      { value: 4, label: "10 ou mais" },
+    ],
+    [
+      { value: 0, label: "Nunca" },
+      { value: 1, label: "Menos de 1x/mês" },
+      { value: 2, label: "Mensalmente" },
+      { value: 3, label: "Semanalmente" },
+      { value: 4, label: "Diariamente ou quase" },
+    ],
+  ],
+  questions: [
+    "Com que frequência você consome bebidas alcoólicas?",
+    "Nos dias em que bebe, quantas doses costuma consumir?",
+    "Com que frequência você consome 6 ou mais doses em uma única ocasião?",
+  ],
+  severity: (s) => {
+    if (s <= 3) return { label: "Baixo risco", tone: "calm" };
+    if (s <= 7) return { label: "Uso de risco", tone: "moderate" };
+    return { label: "Alto risco", tone: "severe" };
+  },
+};
+
 export const ASSESSMENTS: Record<AssessmentType, AssessmentDef> = {
   gad7: GAD7,
   phq9: PHQ9,
   dass21: DASS21,
+  who5: WHO5,
+  pss10: PSS10,
+  auditc: AUDITC,
 };
 
 export type SubscaleResult = {
@@ -216,7 +352,12 @@ export function computeResult(
   def: AssessmentDef,
   answers: (number | null)[],
 ): AssessmentResult {
-  const total = answers.reduce<number>((sum, a) => sum + (a ?? 0), 0);
+  const opts = def.responseOptions ?? RESPONSE_OPTIONS;
+  const maxVal = Math.max(...opts.map((o) => o.value));
+  const total = answers.reduce<number>((sum, a, i) => {
+    const v = a ?? 0;
+    return sum + (def.reverseIndices?.includes(i) ? maxVal - v : v);
+  }, 0);
   if (def.subscales) {
     const subscales: SubscaleResult[] = def.subscales.map((sub) => {
       const raw =

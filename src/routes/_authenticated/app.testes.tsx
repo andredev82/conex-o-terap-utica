@@ -106,7 +106,10 @@ function TestsPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-serif text-lg font-semibold">{h.score}</span>
+                    <span className="font-serif text-lg font-semibold">
+                      {def.displayScore ? def.displayScore(h.score) : h.score}
+                    </span>
+
                     <span
                       className={cn(
                         "rounded-full px-2.5 py-0.5 text-xs font-medium",
@@ -187,53 +190,63 @@ function TakeTest({ type, onDone }: { type: AssessmentType; onDone: () => void }
       </div>
 
       <div className="space-y-4">
-        {def.questions.map((q, i) => (
-          <div key={i} className="rounded-2xl border border-border bg-card p-4">
-            <p className="mb-3 text-sm font-medium">
-              {i + 1}. {q}
-            </p>
-            <div
-              className={cn(
-                "grid gap-2",
-                def.responseOptions ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-4",
-              )}
-            >
-              {options.map((opt) => {
-                const selected = answers[i] === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() =>
-                      setAnswers((prev) => {
-                        const next = [...prev];
-                        next[i] = opt.value;
-                        return next;
-                      })
-                    }
-                    className={cn(
-                      "rounded-xl border px-3 py-2 text-xs font-medium transition-colors",
-                      selected
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-input bg-background hover:border-primary/40",
-                    )}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
+        {def.questions.map((q, i) => {
+          const qOptions = def.optionsPerQuestion?.[i] ?? options;
+          const wide = def.responseOptions || def.optionsPerQuestion;
+          return (
+            <div key={i} className="rounded-2xl border border-border bg-card p-4">
+              <p className="mb-3 text-sm font-medium">
+                {i + 1}. {q}
+              </p>
+              <div
+                className={cn(
+                  "grid gap-2",
+                  wide ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-2 sm:grid-cols-4",
+                )}
+              >
+                {qOptions.map((opt) => {
+                  const selected = answers[i] === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() =>
+                        setAnswers((prev) => {
+                          const next = [...prev];
+                          next[i] = opt.value;
+                          return next;
+                        })
+                      }
+                      className={cn(
+                        "rounded-xl border px-3 py-2 text-xs font-medium transition-colors",
+                        selected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-input bg-background hover:border-primary/40",
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
 
       <div className="sticky bottom-20 mt-6 flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm md:bottom-4">
         <div>
-          <p className="text-xs text-muted-foreground">Pontuação parcial</p>
+          <p className="text-xs text-muted-foreground">
+            {def.higherIsBetter ? "Bem-estar parcial" : "Pontuação parcial"}
+          </p>
           <p className="font-serif text-2xl font-semibold text-primary">
-            {score}
-            <span className="text-sm text-muted-foreground"> / {def.maxScore}</span>
+            {def.displayScore ? def.displayScore(score) : score}
+            {!def.displayScore && (
+              <span className="text-sm text-muted-foreground"> / {def.maxScore}</span>
+            )}
           </p>
         </div>
+
         <button
           onClick={() => save.mutate()}
           disabled={!complete || save.isPending}
