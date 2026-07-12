@@ -352,7 +352,12 @@ export function computeResult(
   def: AssessmentDef,
   answers: (number | null)[],
 ): AssessmentResult {
-  const total = answers.reduce<number>((sum, a) => sum + (a ?? 0), 0);
+  const opts = def.responseOptions ?? RESPONSE_OPTIONS;
+  const maxVal = Math.max(...opts.map((o) => o.value));
+  const total = answers.reduce<number>((sum, a, i) => {
+    const v = a ?? 0;
+    return sum + (def.reverseIndices?.includes(i) ? maxVal - v : v);
+  }, 0);
   if (def.subscales) {
     const subscales: SubscaleResult[] = def.subscales.map((sub) => {
       const raw =
