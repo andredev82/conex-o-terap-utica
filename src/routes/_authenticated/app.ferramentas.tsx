@@ -152,7 +152,7 @@ function FillTool({ def, onDone }: { def: ToolDef; onDone: () => void }) {
       const { error } = await supabase.from("tool_entries").insert({
         user_id: u.user!.id,
         tool_key: def.key,
-        data: cleaned,
+        data: cleaned as Record<string, string | number | string[]>,
       });
       if (error) throw error;
     },
