@@ -7,6 +7,11 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//")
+      ? s.next
+      : undefined,
+  }),
   component: AuthPage,
 });
 
@@ -17,17 +22,27 @@ const credentials = z.object({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const goNext = () => {
+    if (next) window.location.replace(next);
+    else navigate({ to: "/app", replace: true });
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/app", replace: true });
+      if (data.session) {
+        if (next) window.location.replace(next);
+        else navigate({ to: "/app", replace: true });
+      }
     });
-  }, [navigate]);
+  }, [navigate, next]);
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
