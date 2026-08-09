@@ -1,0 +1,208 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://yttwiqrnaziknjdeeixk.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "conexao-terapeutica",
+      "version": "0.1.0",
+      "title": "Conexão Terapêutica"
+    },
+    "tools": [
+      {
+        "name": "list_mood_entries",
+        "title": "Listar check-ins de humor",
+        "description": "Lista os check-ins de humor (humor, ansiedade, energia e nota) do usuário autenticado, do mais recente para o mais antigo.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Quantidade máxima de registros (padrão 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_mood_entry",
+        "title": "Registrar check-in de humor",
+        "description": "Cria um check-in de humor para o usuário autenticado. Humor, ansiedade e energia vão de 1 a 10.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "mood": {
+              "type": "integer",
+              "description": "Humor de 1 (muito baixo) a 10 (muito bom)."
+            },
+            "anxiety": {
+              "type": "integer",
+              "description": "Ansiedade de 1 (calmo) a 10 (muito ansioso)."
+            },
+            "energy": {
+              "type": "integer",
+              "description": "Energia de 1 (exausto) a 10 (cheio de energia)."
+            },
+            "note": {
+              "type": "string",
+              "description": "Nota livre sobre o momento."
+            }
+          },
+          "required": [
+            "mood",
+            "anxiety",
+            "energy"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_diary_entries",
+        "title": "Listar registros do diário de TCC",
+        "description": "Lista os registros de pensamento (RPD) do diário de TCC do usuário autenticado, do mais recente para o mais antigo.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "description": "Quantidade máxima de registros (padrão 10)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_diary_entry",
+        "title": "Criar registro no diário de TCC",
+        "description": "Cria um registro de pensamento (RPD) no diário de TCC do usuário autenticado, com situação, pensamentos automáticos, emoções e pensamento alternativo.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string",
+              "description": "Título curto do registro."
+            },
+            "situation": {
+              "type": "string",
+              "description": "O que aconteceu (situação objetiva)."
+            },
+            "automatic_thoughts": {
+              "type": "string",
+              "description": "Pensamentos automáticos surgidos."
+            },
+            "emotions": {
+              "type": "string",
+              "description": "Emoções sentidas."
+            },
+            "emotion_intensity": {
+              "type": "integer",
+              "description": "Intensidade da emoção de 0 a 100."
+            },
+            "distortions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Distorções cognitivas identificadas."
+            },
+            "alternative_thought": {
+              "type": "string",
+              "description": "Pensamento alternativo mais equilibrado."
+            }
+          },
+          "required": [
+            "situation"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_assessments",
+        "title": "Listar resultados de testes",
+        "description": "Lista os resultados de escalas aplicadas (GAD-7, PHQ-9, DASS-21, WHO-5, PSS-10, AUDIT-C) do usuário autenticado, com pontuação e severidade.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "Filtra por tipo de escala, por exemplo gad7, phq9 ou dass21."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Quantidade máxima de resultados (padrão 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_tool_entries",
+        "title": "Listar registros de ferramentas",
+        "description": "Lista os registros das ferramentas estruturadas (RPD, gratidão, grounding e outras) do usuário autenticado.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "tool_key": {
+              "type": "string",
+              "description": "Filtra por chave da ferramenta."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Quantidade máxima de registros (padrão 20)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

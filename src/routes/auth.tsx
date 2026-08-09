@@ -7,6 +7,11 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" && s.next.startsWith("/") && !s.next.startsWith("//")
+      ? s.next
+      : undefined,
+  }),
   component: AuthPage,
 });
 
@@ -17,17 +22,27 @@ const credentials = z.object({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const goNext = () => {
+    if (next) window.location.replace(next);
+    else navigate({ to: "/app", replace: true });
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/app", replace: true });
+      if (data.session) {
+        if (next) window.location.replace(next);
+        else navigate({ to: "/app", replace: true });
+      }
     });
-  }, [navigate]);
+  }, [navigate, next]);
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,20 +58,20 @@ function AuthPage() {
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
-            emailRedirectTo: window.location.origin + "/app",
+            emailRedirectTo: window.location.origin + (next ?? "/app"),
             data: { full_name: fullName.trim() },
           },
         });
         if (error) throw error;
         toast.success("Conta criada! Você já pode acessar.");
-        navigate({ to: "/app", replace: true });
+        goNext();
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: parsed.data.email,
           password: parsed.data.password,
         });
         if (error) throw error;
-        navigate({ to: "/app", replace: true });
+        goNext();
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Algo deu errado.";
@@ -71,15 +86,17 @@ function AuthPage() {
   async function handleGoogle() {
     setLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app",
+      redirect_uri: window.location.origin + (next ?? "/app"),
     });
+
     if (result.error) {
       toast.error("Não foi possível entrar com o Google.");
       setLoading(false);
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/app", replace: true });
+    goNext();
+
   }
 
   return (
