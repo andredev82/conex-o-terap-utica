@@ -58,20 +58,20 @@ function AuthPage() {
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
-            emailRedirectTo: window.location.origin + "/app",
+            emailRedirectTo: window.location.origin + (next ?? "/app"),
             data: { full_name: fullName.trim() },
           },
         });
         if (error) throw error;
         toast.success("Conta criada! Você já pode acessar.");
-        navigate({ to: "/app", replace: true });
+        goNext();
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: parsed.data.email,
           password: parsed.data.password,
         });
         if (error) throw error;
-        navigate({ to: "/app", replace: true });
+        goNext();
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Algo deu errado.";
@@ -86,8 +86,9 @@ function AuthPage() {
   async function handleGoogle() {
     setLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app",
+      redirect_uri: window.location.origin + (next ?? "/app"),
     });
+
     if (result.error) {
       toast.error("Não foi possível entrar com o Google.");
       setLoading(false);
