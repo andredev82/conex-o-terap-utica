@@ -95,7 +95,8 @@ function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/app", replace: true });
+    goNext();
+
   }
 
   return (
