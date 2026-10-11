@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
 const features = [
   {
     icon: BookHeart,
-    title: "Diário de TCC.",
+    title: "Diário de TCC teste",
     desc: "Registre situações, pensamentos automáticos e reestruture-os com ferramentas da terapia cognitivo-comportamental.",
   },
   {
