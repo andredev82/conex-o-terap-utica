@@ -1,11 +1,25 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookHeart, HeartPulse, MessageCircle, LayoutDashboard, LogOut, User, Leaf, Users, ClipboardList, Wrench } from "lucide-react";
+import {
+  BookHeart,
+  HeartPulse,
+  MessageCircle,
+  LayoutDashboard,
+  LogOut,
+  User,
+  Leaf,
+  Users,
+  ClipboardList,
+  Wrench,
+  LifeBuoy,
+  ShieldCheck,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useIsTherapist } from "@/hooks/use-role";
+import { useIsTherapist, useIsAdmin } from "@/hooks/use-role";
+import { CrisisSupport } from "@/components/CrisisSupport";
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 const baseNav = [
   { to: "/app", label: "Início", icon: LayoutDashboard },
@@ -18,15 +32,21 @@ const baseNav = [
 ] as const;
 
 const therapistTab = { to: "/app/pacientes", label: "Pacientes", icon: Users } as const;
+const adminTab = { to: "/app/admin/terapeutas", label: "Admin", icon: ShieldCheck } as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { data: isTherapist } = useIsTherapist();
+  const { data: isAdmin } = useIsAdmin();
+  const [helpOpen, setHelpOpen] = useState(false);
+
   const nav = isTherapist
     ? [...baseNav.slice(0, -1), therapistTab, baseNav[baseNav.length - 1]]
     : baseNav;
+  // O link de admin aparece só no menu lateral (desktop).
+  const sidebarNav = isAdmin ? [...nav, adminTab] : nav;
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -46,7 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="font-serif text-xl font-semibold text-sidebar-foreground">Sereno</span>
         </Link>
         <nav className="flex flex-1 flex-col gap-1">
-          {nav.map((item) => {
+          {sidebarNav.map((item) => {
             const active = pathname === item.to;
             return (
               <Link
@@ -66,13 +86,30 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <button
+          onClick={() => setHelpOpen(true)}
+          className="mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <LifeBuoy className="size-5" />
+          Preciso de ajuda agora
+        </button>
+        <button
           onClick={handleSignOut}
-          className="mt-4 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
           <LogOut className="size-5" />
           Sair
         </button>
       </aside>
+
+      {/* Ajuda (mobile) */}
+      <button
+        onClick={() => setHelpOpen(true)}
+        aria-label="Preciso de ajuda agora"
+        className="fixed right-3 top-3 z-20 flex items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur md:hidden"
+      >
+        <LifeBuoy className="size-4" />
+        Ajuda
+      </button>
 
       {/* Content */}
       <div className="flex-1 pb-24 md:pb-0">
@@ -98,6 +135,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           );
         })}
       </nav>
+
+      <CrisisSupport open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   );
 }

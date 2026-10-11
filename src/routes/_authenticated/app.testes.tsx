@@ -6,6 +6,7 @@ import { ptBR } from "date-fns/locale";
 import { ClipboardList, ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/AppShell";
+import { CrisisSupport } from "@/components/CrisisSupport";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
@@ -28,8 +29,17 @@ type Row = {
   created_at: string;
 };
 
+// PHQ-9 item 9 (índice 8) e DASS-21 item 21 (índice 20) tocam em pensamentos de morte
+// ou de falta de sentido na vida. Qualquer resposta positiva abre a tela de apoio.
+function hasCrisisSignal(type: AssessmentType, answers: (number | null)[]): boolean {
+  if (type === "phq9") return (answers[8] ?? 0) > 0;
+  if (type === "dass21") return (answers[20] ?? 0) >= 1;
+  return false;
+}
+
 function TestsPage() {
   const [active, setActive] = useState<AssessmentType | null>(null);
+  const [crisisOpen, setCrisisOpen] = useState(false);
 
   const { data: history } = useQuery({
     queryKey: ["assessments"],
@@ -43,98 +53,114 @@ function TestsPage() {
     },
   });
 
-  if (active) {
-    return <TakeTest type={active} onDone={() => setActive(null)} />;
-  }
-
   return (
-    <AppShell>
-      <PageHeader
-        title="Testes"
-        subtitle="Escalas validadas para acompanhar ansiedade e humor ao longo do tempo."
-      />
+    <>
+      {active ? (
+        <TakeTest
+          type={active}
+          onDone={(crisis) => {
+            setActive(null);
+            if (crisis) setCrisisOpen(true);
+          }}
+        />
+      ) : (
+        <AppShell>
+          <PageHeader
+            title="Testes"
+            subtitle="Escalas validadas para acompanhar ansiedade e humor ao longo do tempo."
+          />
 
-      <div className="grid gap-4">
-        {(Object.keys(ASSESSMENTS) as AssessmentType[]).map((t) => {
-          const def = ASSESSMENTS[t];
-          const last = history?.find((h) => h.type === t);
-          return (
-            <div key={t} className="rounded-2xl border border-border bg-card p-5">
-              <div className="flex items-start gap-4">
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
-                  <ClipboardList className="size-6" />
-                </span>
-                <div className="flex-1">
-                  <h3 className="font-semibold">{def.name}</h3>
-                  <p className="text-sm text-muted-foreground">{def.description}</p>
-                  {last && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Último: <span className="font-semibold text-foreground">{last.score}</span> ·{" "}
-                      {last.severity} ·{" "}
-                      {format(new Date(last.created_at), "d MMM yyyy", { locale: ptBR })}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={() => setActive(t)}
-                className="mt-4 w-full rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-              >
-                Responder {def.short}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-
-      {history && history.length > 0 && (
-        <div className="mt-8">
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Histórico</h2>
-          <div className="grid gap-2">
-            {history.map((h) => {
-              const def = ASSESSMENTS[h.type];
-              const tone = def.severity(h.score).tone;
+          <div className="grid gap-4">
+            {(Object.keys(ASSESSMENTS) as AssessmentType[]).map((t) => {
+              const def = ASSESSMENTS[t];
+              const last = history?.find((h) => h.type === t);
               return (
-                <div
-                  key={h.id}
-                  className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3"
-                >
-                  <div>
-                    <span className="text-sm font-medium">{def.short}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {format(new Date(h.created_at), "d MMM yyyy, HH:mm", { locale: ptBR })}
+                <div key={t} className="rounded-2xl border border-border bg-card p-5">
+                  <div className="flex items-start gap-4">
+                    <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-secondary text-secondary-foreground">
+                      <ClipboardList className="size-6" />
                     </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-serif text-lg font-semibold">
-                      {def.displayScore ? def.displayScore(h.score) : h.score}
-                    </span>
-
-                    <span
-                      className={cn(
-                        "rounded-full px-2.5 py-0.5 text-xs font-medium",
-                        severityToneClass[tone],
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{def.name}</h3>
+                      <p className="text-sm text-muted-foreground">{def.description}</p>
+                      {last && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Último: <span className="font-semibold text-foreground">{last.score}</span>{" "}
+                          · {last.severity} ·{" "}
+                          {format(new Date(last.created_at), "d MMM yyyy", { locale: ptBR })}
+                        </p>
                       )}
-                    >
-                      {h.severity}
-                    </span>
+                    </div>
                   </div>
+                  <button
+                    onClick={() => setActive(t)}
+                    className="mt-4 w-full rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                  >
+                    Responder {def.short}
+                  </button>
                 </div>
               );
             })}
           </div>
-        </div>
+
+          {history && history.length > 0 && (
+            <div className="mt-8">
+              <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Histórico</h2>
+              <div className="grid gap-2">
+                {history.map((h) => {
+                  const def = ASSESSMENTS[h.type];
+                  const tone = def.severity(h.score).tone;
+                  return (
+                    <div
+                      key={h.id}
+                      className="flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3"
+                    >
+                      <div>
+                        <span className="text-sm font-medium">{def.short}</span>
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {format(new Date(h.created_at), "d MMM yyyy, HH:mm", { locale: ptBR })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-serif text-lg font-semibold">
+                          {def.displayScore ? def.displayScore(h.score) : h.score}
+                        </span>
+
+                        <span
+                          className={cn(
+                            "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                            severityToneClass[tone],
+                          )}
+                        >
+                          {h.severity}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </AppShell>
       )}
-    </AppShell>
+
+      <CrisisSupport open={crisisOpen} onOpenChange={setCrisisOpen} />
+    </>
   );
 }
 
-function TakeTest({ type, onDone }: { type: AssessmentType; onDone: () => void }) {
+function TakeTest({
+  type,
+  onDone,
+}: {
+  type: AssessmentType;
+  onDone: (crisis: boolean) => void;
+}) {
   const def = ASSESSMENTS[type];
   const options = def.responseOptions ?? RESPONSE_OPTIONS;
   const qc = useQueryClient();
-  const [answers, setAnswers] = useState<(number | null)[]>(
-    () => Array(def.questions.length).fill(null),
+  const [answers, setAnswers] = useState<(number | null)[]>(() =>
+    Array(def.questions.length).fill(null),
   );
 
   const result = useMemo(() => computeResult(def, answers), [def, answers]);
@@ -164,7 +190,7 @@ function TakeTest({ type, onDone }: { type: AssessmentType; onDone: () => void }
             : result.label,
       });
       qc.invalidateQueries({ queryKey: ["assessments"] });
-      onDone();
+      onDone(hasCrisisSignal(type, answers));
     },
     onError: (e) =>
       toast.error(
@@ -178,7 +204,8 @@ function TakeTest({ type, onDone }: { type: AssessmentType; onDone: () => void }
     <AppShell>
       <div className="mb-4 flex items-center gap-3">
         <button
-          onClick={onDone}
+          onClick={() => onDone(false)}
+          aria-label="Voltar para a lista de testes"
           className="flex size-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-accent"
         >
           <ArrowLeft className="size-4" />
@@ -232,7 +259,6 @@ function TakeTest({ type, onDone }: { type: AssessmentType; onDone: () => void }
           );
         })}
       </div>
-
 
       <div className="sticky bottom-20 mt-6 flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm md:bottom-4">
         <div>
