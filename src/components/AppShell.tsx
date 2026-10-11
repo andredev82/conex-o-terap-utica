@@ -101,19 +101,29 @@ export function AppShell({ children }: { children: ReactNode }) {
         </button>
       </aside>
 
-      {/* Ajuda (mobile) */}
-      <button
-        onClick={() => setHelpOpen(true)}
-        aria-label="Preciso de ajuda agora"
-        className="fixed right-3 top-3 z-20 flex items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur md:hidden"
-      >
-        <LifeBuoy className="size-4" />
-        Ajuda
-      </button>
+      {/* Ajuda e Sair (mobile) */}
+      <div className="fixed right-3 top-3 z-20 flex items-center gap-2 md:hidden">
+        <button
+          onClick={() => setHelpOpen(true)}
+          aria-label="Preciso de ajuda agora"
+          className="flex items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur"
+        >
+          <LifeBuoy className="size-4" />
+          Ajuda
+        </button>
+        <button
+          onClick={handleSignOut}
+          aria-label="Sair da conta"
+          className="flex items-center gap-1.5 rounded-full border border-border bg-card/95 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur"
+        >
+          <LogOut className="size-4" />
+          Sair
+        </button>
+      </div>
 
       {/* Content */}
       <div className="flex-1 pb-24 md:pb-0">
-        <main className="mx-auto w-full max-w-3xl px-4 py-6 md:px-8 md:py-10">{children}</main>
+        <main className="mx-auto w-full max-w-3xl px-4 pb-6 pt-14 md:px-8 md:py-10">{children}</main>
       </div>
 
       {/* Bottom nav (mobile) */}
