@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useIsTherapist() {
+function useHasRole(role: "therapist" | "admin") {
   return useQuery({
-    queryKey: ["is-therapist"],
+    queryKey: ["has-role", role],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return false;
@@ -11,10 +11,13 @@ export function useIsTherapist() {
         .from("user_roles")
         .select("role")
         .eq("user_id", u.user.id)
-        .eq("role", "therapist")
+        .eq("role", role)
         .maybeSingle();
       return !!data;
     },
     staleTime: 60_000,
   });
 }
+
+export const useIsTherapist = () => useHasRole("therapist");
+export const useIsAdmin = () => useHasRole("admin");

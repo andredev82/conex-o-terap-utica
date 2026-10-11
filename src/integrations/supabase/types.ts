@@ -143,6 +143,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
           therapist_id: string | null
@@ -153,6 +154,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           therapist_id?: string | null
@@ -163,12 +165,76 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           therapist_id?: string | null
           therapist_name?: string | null
           therapist_specialty?: Database["public"]["Enums"]["specialty"] | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      therapist_links: {
+        Row: {
+          created_at: string
+          id: string
+          patient_id: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["link_status"]
+          therapist_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          patient_id: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["link_status"]
+          therapist_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          patient_id?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["link_status"]
+          therapist_id?: string
+        }
+        Relationships: []
+      }
+      therapist_verifications: {
+        Row: {
+          council: Database["public"]["Enums"]["professional_council"]
+          created_at: string
+          id: string
+          registration_number: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["verification_status"]
+          uf: string
+          user_id: string
+        }
+        Insert: {
+          council: Database["public"]["Enums"]["professional_council"]
+          created_at?: string
+          id?: string
+          registration_number: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          uf: string
+          user_id: string
+        }
+        Update: {
+          council?: Database["public"]["Enums"]["professional_council"]
+          created_at?: string
+          id?: string
+          registration_number?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          uf?: string
           user_id?: string
         }
         Relationships: []
@@ -237,10 +303,29 @@ export type Database = {
         Args: { _patient: string; _therapist: string }
         Returns: boolean
       }
+      my_therapist_links: {
+        Args: never
+        Returns: {
+          council: Database["public"]["Enums"]["professional_council"]
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["link_status"]
+          therapist_id: string
+          therapist_name: string
+        }[]
+      }
     }
     Enums: {
       app_role: "patient" | "therapist" | "admin"
       assessment_type: "gad7" | "phq9" | "dass21" | "who5" | "pss10" | "auditc"
+      link_status: "pending" | "accepted" | "declined" | "revoked"
+      professional_council:
+        | "CRP"
+        | "CRM"
+        | "CREFITO"
+        | "CREFONO"
+        | "COFFITO"
+        | "outro"
       specialty:
         | "psychology"
         | "occupational_therapy"
@@ -248,6 +333,7 @@ export type Database = {
         | "physiotherapy"
         | "speech_therapy"
         | "other"
+      verification_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -263,12 +349,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -292,11 +378,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -317,11 +403,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -342,11 +428,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -359,11 +445,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -377,6 +463,15 @@ export const Constants = {
     Enums: {
       app_role: ["patient", "therapist", "admin"],
       assessment_type: ["gad7", "phq9", "dass21", "who5", "pss10", "auditc"],
+      link_status: ["pending", "accepted", "declined", "revoked"],
+      professional_council: [
+        "CRP",
+        "CRM",
+        "CREFITO",
+        "CREFONO",
+        "COFFITO",
+        "outro",
+      ],
       specialty: [
         "psychology",
         "occupational_therapy",
@@ -385,6 +480,7 @@ export const Constants = {
         "speech_therapy",
         "other",
       ],
+      verification_status: ["pending", "approved", "rejected"],
     },
   },
 } as const
