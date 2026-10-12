@@ -2,41 +2,22 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { UserPlus, ChevronRight, Users, Sparkles, Clock } from "lucide-react";
+import { UserPlus, ChevronRight, Users, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
 import { useIsTherapist } from "@/hooks/use-role";
 import { invitePatientByEmail } from "@/lib/therapist.functions";
+import { ProfessionalRequest } from "@/components/ProfessionalRequest";
 
 export const Route = createFileRoute("/_authenticated/app/pacientes/")({
   component: PatientsPage,
 });
 
-type Council = Database["public"]["Enums"]["professional_council"];
-
 type Patient = {
   user_id: string;
   full_name: string | null;
 };
-
-const COUNCILS: { value: Council; label: string }[] = [
-  { value: "CRP", label: "CRP – Psicologia" },
-  { value: "CRM", label: "CRM – Medicina" },
-  { value: "CREFITO", label: "CREFITO – Fisioterapia / Terapia ocupacional" },
-  { value: "CREFONO", label: "CREFONO – Fonoaudiologia" },
-  { value: "COFFITO", label: "COFFITO" },
-  { value: "outro", label: "Outro conselho" },
-];
-
-const UFS = [
-  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA",
-  "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
-];
-
-const inputClass =
-  "w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30";
 
 function PatientsPage() {
   const { data: isTherapist, isLoading } = useIsTherapist();
@@ -49,183 +30,7 @@ function PatientsPage() {
     );
   }
 
-  return isTherapist ? <TherapistPanel /> : <AccessRequest />;
-}
-
-/* ------------------------------------------------------------------ */
-/* Quem ainda não é terapeuta: solicitação de acesso profissional      */
-/* ------------------------------------------------------------------ */
-function AccessRequest() {
-  const qc = useQueryClient();
-  const [council, setCouncil] = useState<Council | "">("");
-  const [registration, setRegistration] = useState("");
-  const [uf, setUf] = useState("");
-
-  const { data: verification, isLoading } = useQuery({
-    queryKey: ["my-verification"],
-    queryFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
-      const { data, error } = await supabase
-        .from("therapist_verifications")
-        .select("status")
-        .eq("user_id", u.user!.id)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const request = useMutation({
-    mutationFn: async () => {
-      const reg = registration.trim();
-      if (!council || !uf || !reg) throw new Error("Preencha todos os campos.");
-      const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase.from("therapist_verifications").insert({
-        user_id: u.user!.id,
-        council,
-        registration_number: reg,
-        uf,
-      });
-      if (error) throw new Error("Não foi possível enviar a solicitação.");
-    },
-    onSuccess: () => {
-      toast.success("Solicitação enviada.");
-      qc.invalidateQueries({ queryKey: ["my-verification"] });
-    },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Não foi possível enviar."),
-  });
-
-  if (isLoading) {
-    return (
-      <AppShell>
-        <div className="py-20 text-center text-sm text-muted-foreground">Carregando...</div>
-      </AppShell>
-    );
-  }
-
-  const status = verification?.status;
-
-  return (
-    <AppShell>
-      <PageHeader
-        title="Painel do terapeuta"
-        subtitle="Acompanhe seus pacientes entre as consultas."
-      />
-
-      {status === "pending" && (
-        <div className="rounded-2xl border border-border bg-card p-6 text-center">
-          <span className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground">
-            <Clock className="size-7" />
-          </span>
-          <h2 className="text-lg font-semibold">Solicitação em análise</h2>
-          <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            Recebemos seus dados profissionais. Assim que forem conferidos, o painel será liberado
-            nesta tela.
-          </p>
-        </div>
-      )}
-
-      {status === "rejected" && (
-        <div className="rounded-2xl border border-border bg-card p-6 text-center">
-          <h2 className="text-lg font-semibold">Solicitação não aprovada</h2>
-          <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            Sua solicitação não foi aprovada. Entre em contato com o suporte para mais informações.
-          </p>
-        </div>
-      )}
-
-      {status === "approved" && (
-        <div className="rounded-2xl border border-border bg-card p-6 text-center">
-          <h2 className="text-lg font-semibold">Acesso aprovado</h2>
-          <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-            Seu acesso foi aprovado. Atualize a página para ver o painel.
-          </p>
-        </div>
-      )}
-
-      {!status && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            request.mutate();
-          }}
-          className="rounded-2xl border border-border bg-card p-6"
-        >
-          <div className="mb-4 text-center">
-            <span className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-secondary text-secondary-foreground">
-              <Sparkles className="size-7" />
-            </span>
-            <h2 className="text-lg font-semibold">Solicitar acesso profissional</h2>
-            <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
-              Para vincular pacientes e acompanhar diários e emoções, precisamos conferir seu
-              registro profissional.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="council" className="mb-1.5 block text-sm font-medium">
-                Conselho profissional
-              </label>
-              <select
-                id="council"
-                value={council}
-                onChange={(e) => setCouncil(e.target.value as Council | "")}
-                className={inputClass}
-              >
-                <option value="">Selecione...</option>
-                {COUNCILS.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <label htmlFor="registration" className="mb-1.5 block text-sm font-medium">
-                  Número de registro
-                </label>
-                <input
-                  id="registration"
-                  value={registration}
-                  onChange={(e) => setRegistration(e.target.value)}
-                  maxLength={30}
-                  placeholder="Ex: 06/12345"
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label htmlFor="uf" className="mb-1.5 block text-sm font-medium">
-                  UF
-                </label>
-                <select
-                  id="uf"
-                  value={uf}
-                  onChange={(e) => setUf(e.target.value)}
-                  className={inputClass}
-                >
-                  <option value="">--</option>
-                  {UFS.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <button
-              type="submit"
-              disabled={request.isPending}
-              className="w-full rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
-            >
-              {request.isPending ? "Enviando..." : "Enviar solicitação"}
-            </button>
-          </div>
-        </form>
-      )}
-    </AppShell>
-  );
+  return isTherapist ? <TherapistPanel /> : <ProfessionalRequest />;
 }
 
 /* ------------------------------------------------------------------ */

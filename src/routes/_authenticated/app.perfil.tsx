@@ -19,23 +19,12 @@ export const Route = createFileRoute("/_authenticated/app/perfil")({
   component: ProfilePage,
 });
 
-const SPECIALTIES = [
-  { value: "psychology", label: "Psicologia" },
-  { value: "occupational_therapy", label: "Terapia ocupacional" },
-  { value: "psychiatry", label: "Psiquiatria" },
-  { value: "physiotherapy", label: "Fisioterapia" },
-  { value: "speech_therapy", label: "Fonoaudiologia" },
-  { value: "other", label: "Outra" },
-] as const;
-
 const inputClass =
   "w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/30";
 
 function ProfilePage() {
   const qc = useQueryClient();
   const [fullName, setFullName] = useState("");
-  const [therapistName, setTherapistName] = useState("");
-  const [specialty, setSpecialty] = useState<string>("");
   const [email, setEmail] = useState("");
 
   const { data } = useQuery({
@@ -54,8 +43,6 @@ function ProfilePage() {
   useEffect(() => {
     if (data) {
       setFullName(data.profile?.full_name ?? "");
-      setTherapistName(data.profile?.therapist_name ?? "");
-      setSpecialty(data.profile?.therapist_specialty ?? "");
       setEmail(data.email);
     }
   }, [data]);
@@ -67,8 +54,6 @@ function ProfilePage() {
         .from("profiles")
         .update({
           full_name: fullName.trim() || null,
-          therapist_name: therapistName.trim() || null,
-          therapist_specialty: (specialty || null) as never,
         })
         .eq("user_id", u.user!.id);
       if (error) throw error;
@@ -83,7 +68,7 @@ function ProfilePage() {
 
   return (
     <AppShell>
-      <PageHeader title="Seu perfil" subtitle="Ajuste seus dados e quem acompanha você." />
+      <PageHeader title="Seu perfil" subtitle="Ajuste seus dados e veja quem acompanha você." />
 
       <div className="rounded-2xl border border-border bg-card p-5">
         <div className="space-y-4">
@@ -109,37 +94,6 @@ function ProfilePage() {
               className="w-full rounded-xl border border-input bg-muted px-4 py-2.5 text-sm text-muted-foreground"
             />
           </div>
-          <hr className="border-border" />
-          <div>
-            <label htmlFor="therapist-name" className="mb-1.5 block text-sm font-medium">
-              Nome do profissional que acompanha você
-            </label>
-            <input
-              id="therapist-name"
-              value={therapistName}
-              onChange={(e) => setTherapistName(e.target.value)}
-              placeholder="Ex: Dra. Ana"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="specialty" className="mb-1.5 block text-sm font-medium">
-              Especialidade
-            </label>
-            <select
-              id="specialty"
-              value={specialty}
-              onChange={(e) => setSpecialty(e.target.value)}
-              className={inputClass}
-            >
-              <option value="">Selecione...</option>
-              {SPECIALTIES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-          </div>
           <button
             onClick={() => save.mutate()}
             disabled={save.isPending}
@@ -158,13 +112,22 @@ function ProfilePage() {
 /* ------------------------------------------------------------------ */
 /* Quem acompanha você: convites e acessos concedidos a terapeutas      */
 /* ------------------------------------------------------------------ */
-const COUNCIL_LABEL: Record<string, string> = {
-  CRP: "CRP",
-  CRM: "CRM",
-  CREFITO: "CREFITO",
-  CREFONO: "CREFONO",
-  COFFITO: "COFFITO",
+const CATEGORY_LABEL: Record<string, string> = {
+  psicologo: "Psicólogo(a)",
+  psiquiatra: "Psiquiatra",
+  psicanalista: "Psicanalista",
+  terapeuta_holistico: "Terapeuta holístico / integrativo",
   outro: "Profissional de saúde",
+};
+
+type LinkRow = {
+  id: string;
+  therapist_id: string;
+  status: "pending" | "accepted" | "declined" | "revoked";
+  created_at: string;
+  therapist_name: string | null;
+  council: string | null;
+  category: string | null;
 };
 
 type LinkStatus = "accepted" | "declined" | "revoked";
@@ -178,7 +141,7 @@ function TherapistLinksSection() {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("my_therapist_links");
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as unknown as LinkRow[];
     },
   });
 
@@ -204,11 +167,11 @@ function TherapistLinksSection() {
   const pending = (links ?? []).filter((l) => l.status === "pending");
   const active = (links ?? []).filter((l) => l.status === "accepted");
 
-  const who = (l: { therapist_name: string | null; council: string | null }) => (
+  const who = (l: LinkRow) => (
     <div className="flex-1">
       <p className="font-semibold">{l.therapist_name?.trim() || "Profissional"}</p>
       <p className="text-xs text-muted-foreground">
-        {l.council ? (COUNCIL_LABEL[l.council] ?? l.council) : "Registro não informado"}
+        {l.category ? (CATEGORY_LABEL[l.category] ?? "Profissional de saúde") : "Profissional de saúde"}
       </p>
     </div>
   );

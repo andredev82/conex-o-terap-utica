@@ -64,25 +64,51 @@ export const unlinkPatient = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Linha da tabela therapist_verifications com as colunas novas (categoria e comprovação).
+type VerificationRow = {
+  id: string;
+  user_id: string;
+  council: string | null;
+  registration_number: string | null;
+  uf: string | null;
+  category: string;
+  proof_note: string | null;
+  created_at: string;
+};
+
 // Admin: list pending professional verifications.
 export const listPendingVerifications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertRole(context.supabase as never, context.userId, "admin");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("therapist_verifications")
-      .select("id, user_id, council, registration_number, uf, created_at")
+      .select("*")
       .eq("status", "pending")
       .order("created_at", { ascending: true });
     if (error) throw new Error("Não foi possível carregar as solicitações.");
-    const ids = (rows ?? []).map((r) => r.user_id);
+
+    const rows = (data ?? []) as unknown as VerificationRow[];
+    const ids = rows.map((r) => r.user_id);
     const { data: profs } = ids.length
       ? await supabaseAdmin.from("profiles").select("user_id, full_name, email").in("user_id", ids)
       : { data: [] as { user_id: string; full_name: string | null; email: string | null }[] };
-    return (rows ?? []).map((r) => {
+
+    return rows.map((r) => {
       const p = profs?.find((x) => x.user_id === r.user_id);
-      return { ...r, full_name: p?.full_name ?? null, email: p?.email ?? null };
+      return {
+        id: r.id,
+        user_id: r.user_id,
+        council: r.council,
+        registration_number: r.registration_number,
+        uf: r.uf,
+        category: r.category,
+        proof_note: r.proof_note,
+        created_at: r.created_at,
+        full_name: p?.full_name ?? null,
+        email: p?.email ?? null,
+      };
     });
   });
 
